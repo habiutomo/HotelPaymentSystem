@@ -1,81 +1,68 @@
-import React from 'react';
-import { Link, useLocation } from 'wouter';
-import { useLanguage } from '@/lib/i18n';
-import { cn } from '@/lib/utils';
-import { LucideIcon, BarChart2, DoorOpen, CalendarCheck, Users, CreditCard, Settings } from 'lucide-react';
+import { Link, useLocation } from "wouter";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/use-auth";
+import { 
+  LayoutDashboard, 
+  BedDouble, 
+  CalendarDays,
+  CreditCard,
+  Settings,
+  LogOut 
+} from "lucide-react";
 
-interface SidebarItemProps {
-  href: string;
-  icon: LucideIcon;
-  label: string;
-  active?: boolean;
-}
+const navigation = [
+  { name: "Dashboard", href: "/", icon: LayoutDashboard },
+  { name: "Rooms", href: "/rooms", icon: BedDouble },
+  { name: "Bookings", href: "/bookings", icon: CalendarDays },
+  { name: "Payments", href: "/payments", icon: CreditCard },
+  { name: "Settings", href: "/settings", icon: Settings },
+];
 
-const SidebarItem: React.FC<SidebarItemProps> = ({ href, icon: Icon, label, active }) => {
-  return (
-    <li>
-      <Link href={href}>
-        <div className={cn(
-          "flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary cursor-pointer",
-          active ? "bg-primary/5 text-primary" : "text-slate-500"
-        )}>
-          <Icon className="h-4 w-4" />
-          {label}
-        </div>
-      </Link>
-    </li>
-  );
-};
-
-const Sidebar: React.FC = () => {
+export function Sidebar() {
   const [location] = useLocation();
-  const { t } = useLanguage();
+  const { logoutMutation } = useAuth();
 
   return (
-    <aside className="w-full md:w-64 shrink-0">
-      <div className="bg-white shadow rounded-lg p-4">
-        <h3 className="font-semibold text-lg text-secondary mb-4">{t('common.admin')}</h3>
-        <ul className="space-y-2">
-          <SidebarItem 
-            href="/" 
-            icon={BarChart2} 
-            label={t('common.dashboard')} 
-            active={location === '/'} 
-          />
-          <SidebarItem 
-            href="/rooms" 
-            icon={DoorOpen} 
-            label={t('room.management')} 
-            active={location === '/rooms'} 
-          />
-          <SidebarItem 
-            href="/bookings" 
-            icon={CalendarCheck} 
-            label={t('nav.bookings')} 
-            active={location === '/bookings'} 
-          />
-          <SidebarItem 
-            href="/guests" 
-            icon={Users} 
-            label={t('nav.guests')} 
-            active={location === '/guests'} 
-          />
-          <SidebarItem 
-            href="/payments" 
-            icon={CreditCard} 
-            label={t('nav.payments')} 
-            active={location === '/payments'} 
-          />
-          <SidebarItem 
-            href="/settings" 
-            icon={Settings} 
-            label={t('nav.settings')} 
-            active={location === '/settings'} 
-          />
-        </ul>
+    <div className="flex h-screen flex-col gap-y-5 bg-sidebar border-r border-sidebar-border p-6">
+      <div className="flex h-16 shrink-0 items-center">
+        <h1 className="text-2xl font-bold text-sidebar-primary">HotelX</h1>
       </div>
-    </aside>
+      <nav className="flex flex-1 flex-col">
+        <ul role="list" className="flex flex-1 flex-col gap-y-7">
+          <li>
+            <ul role="list" className="-mx-2 space-y-1">
+              {navigation.map((item) => (
+                <li key={item.name}>
+                  <Link href={item.href}>
+                    <div
+                      className={cn(
+                        location === item.href
+                          ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                          : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
+                        "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 cursor-pointer"
+                      )}
+                    >
+                      <item.icon className="h-6 w-6 shrink-0" />
+                      {item.name}
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </li>
+          <li className="mt-auto">
+            <Button
+              variant="ghost"
+              className="w-full justify-start gap-x-3"
+              onClick={() => logoutMutation.mutate()}
+            >
+              <LogOut className="h-6 w-6 shrink-0" />
+              Logout
+            </Button>
+          </li>
+        </ul>
+      </nav>
+    </div>
   );
-};
-
-export default Sidebar;
+}
